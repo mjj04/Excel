@@ -1,0 +1,180 @@
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+##########   yesno ############
+Insert a blank row after each row.
+Keep F = 1, G = Yes (original row).
+Move H = 0 → F of new row.
+Move I = No → G of new row.
+No merging in F/G.
+Merge columns A to E across the row pair.
+
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+Sub InsertRowMoveNoMergeFG()
+    Dim ws As Worksheet
+    Dim lastRow As Long, i As Long
+    Dim col As Integer
+
+    Set ws = ActiveSheet
+    Application.ScreenUpdating = False
+
+    lastRow = ws.Cells(ws.Rows.Count, 1).End(xlUp).Row
+
+    ' Loop from bottom to top
+    For i = lastRow To 2 Step -1
+        ' Insert new row below
+        ws.Rows(i + 1).Insert Shift:=xlDown
+
+        ' Copy "0" from H to F in new row
+        ws.Cells(i + 1, 6).Value = ws.Cells(i, 8).Value
+        
+        ' Copy "No" from I to G in new row
+        ws.Cells(i + 1, 7).Value = ws.Cells(i, 9).Value
+
+        ' Clear H and I in original row
+        ws.Cells(i, 8).ClearContents
+        ws.Cells(i, 9).ClearContents
+
+        ' Merge A to E down for each row pair
+        For col = 1 To 5
+            With ws.Range(ws.Cells(i, col), ws.Cells(i + 1, col))
+                .Merge
+                .HorizontalAlignment = xlCenter
+                .VerticalAlignment = xlCenter
+            End With
+        Next col
+    Next i
+
+    Application.ScreenUpdating = True
+    MsgBox "Done! 'Yes/No' values are now alternating in F/G, and A–E are merged per pair.", vbInformation
+End Sub
+
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+#####  dropdown_diary_symptoms #######
+0	 No symptoms 
+1	 Mild - easily tolerated with no limitation on normal activity 
+2	 Moderate - some limitation of daily activity 
+3	 Severe - unable to perform normal daily activity 
+4	 Emergency department or hospital admission required
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Sub ExpandAllFiveOptionRows()
+    Dim ws As Worksheet
+    Dim i As Long
+    Dim lastRow As Long
+    Dim col As Integer
+
+    Set ws = ActiveSheet
+    Application.ScreenUpdating = False
+
+    lastRow = ws.Cells(ws.Rows.Count, 1).End(xlUp).Row
+
+    ' Loop bottom to top to avoid row shift issues
+    For i = lastRow To 2 Step -1
+        ' Check if F and G have 0 and "No symptoms", and H to O are filled
+        If ws.Cells(i, 6).Value = 0 And ws.Cells(i, 7).Value <> "" And _
+           Application.WorksheetFunction.CountA(ws.Range(ws.Cells(i, 8), ws.Cells(i, 15))) = 8 Then
+
+            ' Insert 4 rows below
+            ws.Rows(i + 1 & ":" & i + 4).Insert Shift:=xlDown
+
+            ' Move options 1–4 to F & G of new rows
+            ws.Cells(i + 1, 6).Value = ws.Cells(i, 8).Value   ' 1
+            ws.Cells(i + 1, 7).Value = ws.Cells(i, 9).Value
+
+            ws.Cells(i + 2, 6).Value = ws.Cells(i, 10).Value  ' 2
+            ws.Cells(i + 2, 7).Value = ws.Cells(i, 11).Value
+
+            ws.Cells(i + 3, 6).Value = ws.Cells(i, 12).Value  ' 3
+            ws.Cells(i + 3, 7).Value = ws.Cells(i, 13).Value
+
+            ws.Cells(i + 4, 6).Value = ws.Cells(i, 14).Value  ' 4
+            ws.Cells(i + 4, 7).Value = ws.Cells(i, 15).Value
+
+            ' Clear original H to O
+            ws.Range(ws.Cells(i, 8), ws.Cells(i, 15)).ClearContents
+
+            ' Merge A to E down
+            For col = 1 To 5
+                With ws.Range(ws.Cells(i, col), ws.Cells(i + 4, col))
+                    .Merge
+                    .HorizontalAlignment = xlCenter
+                    .VerticalAlignment = xlCenter
+                End With
+            Next col
+        End If
+    Next i
+
+    Application.ScreenUpdating = True
+    MsgBox "All 5-option rows expanded and A–E merged. Done.", vbInformation
+End Sub
+
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+#####  dropdown_ #######
+
+1	 Mild - easily tolerated with no limitation on normal activity 
+2	 Moderate - some limitation of daily activity 
+3	 Severe - unable to perform normal daily activity 
+4	 Emergency department or hospital admission required
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+
+Sub ExpandAllFourOptionRows_StartingAt1()
+    Dim ws As Worksheet
+    Dim i As Long
+    Dim lastRow As Long
+    Dim col As Integer
+
+    Set ws = ActiveSheet
+    Application.ScreenUpdating = False
+
+    lastRow = ws.Cells(ws.Rows.Count, 1).End(xlUp).Row
+
+    ' Loop bottom to top to avoid row shift issues
+    For i = lastRow To 2 Step -1
+        ' Check if F and G have 1 and some label, and H to M are filled (4 more options)
+        If ws.Cells(i, 6).Value = 1 And ws.Cells(i, 7).Value <> "" And _
+           Application.WorksheetFunction.CountA(ws.Range(ws.Cells(i, 8), ws.Cells(i, 13))) = 6 Then
+
+            ' Insert 3 rows below (to make total of 4 rows: current + 3 more)
+            ws.Rows(i + 1 & ":" & i + 3).Insert Shift:=xlDown
+
+            ' Move options 2–4 into the new rows under F and G
+            ws.Cells(i + 1, 6).Value = ws.Cells(i, 8).Value   ' 2
+            ws.Cells(i + 1, 7).Value = ws.Cells(i, 9).Value
+
+            ws.Cells(i + 2, 6).Value = ws.Cells(i, 10).Value  ' 3
+            ws.Cells(i + 2, 7).Value = ws.Cells(i, 11).Value
+
+            ws.Cells(i + 3, 6).Value = ws.Cells(i, 12).Value  ' 4
+            ws.Cells(i + 3, 7).Value = ws.Cells(i, 13).Value
+
+            ' Clear original H to M
+            ws.Range(ws.Cells(i, 8), ws.Cells(i, 13)).ClearContents
+
+            ' Merge A to E across the 4-row block (i to i+3)
+            For col = 1 To 5
+                With ws.Range(ws.Cells(i, col), ws.Cells(i + 3, col))
+                    .Merge
+                    .HorizontalAlignment = xlCenter
+                    .VerticalAlignment = xlCenter
+                End With
+            Next col
+        End If
+    Next i
+
+    Application.ScreenUpdating = True
+    MsgBox "All 4-option rows expanded and A–E merged.", vbInformation
+End Sub
+
+
+
