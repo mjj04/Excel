@@ -1,0 +1,60 @@
+MERGE A - P AND COICES Q AND R
+
+
+Sub ExpandAndMergeChoices_FromQ()
+    Dim ws As Worksheet
+    Dim lastRow As Long, i As Long, j As Integer
+    Dim optionCount As Integer
+    Dim startCol As Integer, currentCol As Integer
+
+    Set ws = ActiveSheet
+    Application.ScreenUpdating = False
+
+    lastRow = ws.Cells(ws.Rows.Count, 1).End(xlUp).Row
+
+    ' Column Q = 17
+    startCol = 17
+
+    ' Process from bottom upwards
+    For i = lastRow To 2 Step -1
+        ' Check if Q is not blank
+        If ws.Cells(i, startCol).Value <> "" Then
+            ' Count how many filled option pairs from Q onward
+            optionCount = 0
+            currentCol = startCol
+            Do While ws.Cells(i, currentCol).Value <> "" And ws.Cells(i, currentCol + 1).Value <> ""
+                optionCount = optionCount + 1
+                currentCol = currentCol + 2
+            Loop
+
+            ' If more than 1 option, expand vertically
+            If optionCount > 1 Then
+                ' Insert required number of rows below
+                ws.Rows(i + 1 & ":" & i + optionCount - 1).Insert Shift:=xlDown
+
+                ' Move option pairs vertically into columns Q & R
+                For j = 2 To optionCount
+                    ws.Cells(i + j - 1, startCol).Value = ws.Cells(i, startCol + (j - 1) * 2).Value
+                    ws.Cells(i + j - 1, startCol + 1).Value = ws.Cells(i, startCol + (j - 1) * 2 + 1).Value
+                Next j
+
+                ' Clear original moved cells from Q onward
+                ws.Range(ws.Cells(i, startCol + 2), ws.Cells(i, startCol + optionCount * 2 - 1)).ClearContents
+
+                ' Merge columns A–P down the expanded rows
+                Dim mergeCol As Integer
+                For mergeCol = 1 To 16
+                    With ws.Range(ws.Cells(i, mergeCol), ws.Cells(i + optionCount - 1, mergeCol))
+                        .Merge
+                        .HorizontalAlignment = xlCenter
+                        .VerticalAlignment = xlCenter
+                    End With
+                Next mergeCol
+            End If
+        End If
+    Next i
+
+    Application.ScreenUpdating = True
+    MsgBox "Expansion and merging complete from Column Q.", vbInformation
+End Sub
+
